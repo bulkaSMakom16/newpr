@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>История заказов</h2>
+
+{% if orders %}
+    <ul>
+    {% for order in orders %}
+        <li>
+            <a href="{% url 'order_detail' order.id %}">Заказ №{{ order.id }}</a> от {{ order.created }} - 
+            {% if order.paid %}Оплачен{% else %}Не оплачен{% endif %} - 
+            Итого: {{ order.get_total_cost }}
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>У вас пока нет заказов.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% load cart_tags %}
+
+{% block content %}
+<h2>Ваша корзина</h2>
+
+{% if cart.items.exists %}
+    <table>
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Количество</th>
+                <th>Цена</th>
+                <th>Общая сумма</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart.items.all %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>
+                    <form action="{% url 'cart:update_cart' item.id %}" method="post">
+                        {% csrf_token %}
+                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1">
+                        <button type="submit">Обновить</button>
+                    </form>
+                </td>
+                <td>{{ item.product.price }}</td>
+                <td>{{ item.get_total_price }}</td>
+                <td>
+                    <form action="{% url 'cart:remove_from_cart' item.product.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Удалить из корзины</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h3>Итог: {{ cart.items.all|total_cart_price }}</h3>
+{% else %}
+    <p>Ваша корзина пуста.</p>
+    <a href="{% url 'product_list' %}">Добавить продукты</a>
+{% endif %}
+
+<h2>История заказов</h2>
+{% if orders %}
+    <table>
+        <thead>
+            <tr>
+                <th>№ Заказа</th>
+                <th>Дата</th>
+                <th>Статус</th>
+                <th>Итоговая сумма</th>
+                <th>Детали</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.created }}</td>
+                <td>{% if order.paid %}Оплачен{% else %}Не оплачен{% endif %}</td>
+                <td>{{ order.get_total_cost }}</td>
+                <td>
+                    <a href="{% url 'order_detail' order.id %}">Просмотреть</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>У вас нет заказов.</p>
+{% endif %}
+{% endblock %}
